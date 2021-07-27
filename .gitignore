@@ -1,0 +1,7 @@
+target/
+
+neardev/
+
+res/vault.wasm
+res/test_token.wasm
+*/res/
