@@ -91,4 +91,16 @@ impl Contract {
             unclaimed_amount: account.unclaimed_amount(env::block_timestamp()).into(),
         })
     }
+
+    pub fn list_accounts(&self) -> Vec<AccountOutput> {
+        self.accounts.values().map(|account| AccountOutput {
+            account_id: account.account_id.clone(),
+            start_timestamp: account.start_timestamp,
+            release_interval: account.release_interval,
+            release_rounds: account.release_rounds,
+            last_claim_round: account.last_claim_round,
+            release_per_round: account.release_per_round.into(),
+            unclaimed_amount: account.unclaimed_amount(env::block_timestamp()).into(),
+        }).collect()
+    }
 }
