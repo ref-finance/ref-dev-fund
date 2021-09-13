@@ -5,7 +5,7 @@ use near_sdk_sim::{
 use vault::{Stats, AccountOutput};
 use crate::common::init::*;
 
-mod common;
+pub mod common;
 
 
 #[test]
@@ -22,7 +22,7 @@ fn core_logic() {
     assert_eq!(
         vault_stats,
         Stats {
-            version: "0.2.1".to_string(),
+            version: "0.3.1".to_string(),
             owner_id: owner.account_id(),
             token_account_id: token.account_id(),
             total_balance: U128(10000),

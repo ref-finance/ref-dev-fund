@@ -65,7 +65,7 @@ impl Contract {
         let (liquid_balance, unclaimed_balance) = self.cur_funding_balance();
         Stats {
             owner_id: self.owner_id.clone(),
-            version: String::from("0.2.1"),
+            version: env!("CARGO_PKG_VERSION").to_string(),
             token_account_id: self.token_account_id.clone(),
             total_balance: self.total_balance.into(),
             claimed_balance: self.claimed_balance.into(),
