@@ -12,31 +12,29 @@ pub mod common;
 fn core_logic() {
     println!("*** deploy and init contracts");
     let (root, owner, vault, token) = setup_vault(10000, 50, 10, 10);
-    println!("block env ----> height: {}, ts: {}", 
-        root.borrow_runtime().current_block().block_height,
-        root.borrow_runtime().current_block().block_timestamp,
-    );
+    println!("block env ----> height: {}", root.borrow_runtime().current_block().block_height);
+    
     // height 26, 
     let vault_stats = view!(vault.get_stats()).unwrap_json::<Stats>();
     // println!("Vault stats: {:#?}", vault_stats);
-    assert_eq!(
-        vault_stats,
-        Stats {
-            version: "0.3.1".to_string(),
-            owner_id: owner.account_id(),
-            token_account_id: token.account_id(),
-            total_balance: U128(10000),
-            start_timestamp: 50,
-            release_interval: 10,
-            release_rounds: 10,
+    assert_eq!(vault_stats.version, "0.3.1".to_string());
+    assert_eq!(vault_stats.owner_id, owner.account_id());
+    assert_eq!(vault_stats.token_account_id, token.account_id());
+    assert_eq!(vault_stats.total_balance.0, 10000);
+    assert_eq!(vault_stats.start_timestamp, 50);
+    assert_eq!(vault_stats.release_interval, 10);
+    assert_eq!(vault_stats.release_rounds, 10);
+    assert_eq!(vault_stats.claimed_balance.0, 0);
+    assert_eq!(vault_stats.locked_balance.0, 10000);
+    assert_eq!(vault_stats.liquid_balance.0, 0);
+    assert_eq!(vault_stats.unclaimed_balance.0, 0);
+    assert_eq!(vault_stats.current_round, 0);
 
-            claimed_balance: U128(0),
-            locked_balance: U128(10000),
-            liquid_balance: U128(0),
-            unclaimed_balance: U128(0),
-            current_round: 0,
-        }
-    );
+    call!(
+        owner,
+        token.ft_transfer(vault.valid_account_id(), U128(10000), None),
+        deposit = 1
+    ).assert_success();
 
     println!("*** Chain goes for 60 blocks ***");
     assert!(root.borrow_runtime_mut().produce_blocks(60).is_ok());
@@ -138,6 +136,11 @@ fn core_logic() {
 #[test]
 fn remove_user() {
     let (root, owner, vault, token) = setup_vault(10000, 50, 10, 10);
+    call!(
+        owner,
+        token.ft_transfer(vault.valid_account_id(), U128(10000), None),
+        deposit = 1
+    ).assert_success();
 
     let user1 = root.create_user("user1".to_string(), to_yocto("10"));
     let user2 = root.create_user("user2".to_string(), to_yocto("10"));
@@ -190,6 +193,11 @@ fn remove_user() {
 #[test]
 fn life_cycle() {
     let (root, owner, vault, token) = setup_vault(100, 50, 10, 10);
+    call!(
+        owner,
+        token.ft_transfer(vault.valid_account_id(), U128(100), None),
+        deposit = 1
+    ).assert_success();
 
     assert!(root.borrow_runtime_mut().produce_blocks(60).is_ok());
     let vault_stats = view!(vault.get_stats()).unwrap_json::<Stats>();

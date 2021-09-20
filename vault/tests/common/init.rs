@@ -91,11 +91,5 @@ pub fn setup_vault(total: u128, start_at: u32, interval: u32, rounds: u32) -> (
 
     call!(owner, token.mint(U128(total))).assert_success();
 
-    call!(
-        owner,
-        token.ft_transfer(to_va("vault".to_string()), U128(total), None),
-        deposit = 1
-    ).assert_success();
-
     (root, owner, vault, token)
 }
