@@ -216,6 +216,7 @@ fn sim_claim() {
     );
     assert_eq!(get_error_count(&out_come), 1);
     assert!(get_error_status(&out_come).contains("The account user1 is not registered"));
+    println!("{:?}", get_logs(&out_come));
     let user_info = view!(session_vault.get_account(user1.valid_account_id())).unwrap_json::<AccountInfo>();
     assert_eq!(user_info.unclaimed_amount.0, 100);
 
