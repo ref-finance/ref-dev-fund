@@ -4,5 +4,4 @@ target/
 
 neardev/
 
-res/vault.wasm
-*/res/
+/res/
