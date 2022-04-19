@@ -32,7 +32,7 @@ token:
 	cp target/wasm32-unknown-unknown/release/test_token.wasm ./res/test_token.wasm
 
 test-session: session token
-	cd session_vault && RUSTFLAGS=$(RFLAGS) cargo test
+	cd session_vault && RUSTFLAGS=$(RFLAGS) cargo test -- --nocapture
 
 test-release-session: token
 	mv res/session_vault.wasm res/session_vault.wasm.back
