@@ -5,7 +5,8 @@ SESSION_RELEASE=session_vault
 
 RFLAGS="-C link-arg=-s"
 
-build: session vault token
+test-session: session token
+	cd session_vault && RUSTFLAGS=$(RFLAGS) cargo test -- --nocapture
 
 docker-session:
 	$(call create_builder,${SESSION_BUILDER_NAME},${SESSION_DIR})
@@ -30,9 +31,6 @@ token:
 	RUSTFLAGS=$(RFLAGS) cargo build -p test_token --target wasm32-unknown-unknown --release
 	mkdir -p res
 	cp target/wasm32-unknown-unknown/release/test_token.wasm ./res/test_token.wasm
-
-test-session: session token
-	cd session_vault && RUSTFLAGS=$(RFLAGS) cargo test -- --nocapture
 
 test-release-session: token
 	mv res/session_vault.wasm res/session_vault.wasm.back

@@ -1,12 +1,37 @@
 //! Implement all the relevant logic for owner of this contract.
 use crate::*;
 use crate::utils::TimestampSec;
+use near_sdk::{assert_one_yocto, StorageUsage, Promise};
+
+impl Contract {
+    /// Check how much storage taken costs and refund the left over back.
+    fn internal_check_storage(&self, prev_storage: StorageUsage) {
+        let storage_cost = env::storage_usage()
+            .checked_sub(prev_storage)
+            .unwrap_or_default() as Balance
+            * env::storage_byte_cost();
+
+        let refund = env::attached_deposit()
+            .checked_sub(storage_cost)
+            .expect(
+                format!(
+                    "ERR_STORAGE_DEPOSIT need {}, attatched {}", 
+                    storage_cost, env::attached_deposit()
+                ).as_str()
+            );
+        if refund > 0 {
+            Promise::new(env::predecessor_account_id()).transfer(refund);
+        }
+    }
+}
 
 #[near_bindgen]
 impl Contract {
     /// Change owner. Only can be called by owner.
+    #[payable]
     pub fn set_owner(&mut self, owner_id: ValidAccountId) {
         self.assert_owner();
+        assert_one_yocto();
         self.data_mut().owner_id = owner_id.as_ref().clone();
     }
 
@@ -15,6 +40,7 @@ impl Contract {
     //     self.data().owner_id.clone()
     // }
 
+    #[payable]
     pub fn add_account(
         &mut self,
         account_id: ValidAccountId,
@@ -23,14 +49,17 @@ impl Contract {
         session_num: u32,
         release_per_session: WrappedBalance,
     ) -> bool {
+        let prev_storage = env::storage_usage();
         self.assert_owner();
-        self.internal_add_account(
+        let ret = self.internal_add_account(
             account_id.into(),
             start_timestamp,
             session_interval,
             session_num,
             release_per_session.into(),
-        )
+        );
+        self.internal_check_storage(prev_storage);
+        ret
     }
 
     pub(crate) fn assert_owner(&self) {

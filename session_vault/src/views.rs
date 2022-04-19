@@ -17,6 +17,14 @@ pub struct ContractInfo {
     pub claimed_balance: WrappedBalance,
 }
 
+#[derive(Serialize)]
+#[serde(crate = "near_sdk::serde")]
+#[cfg_attr(feature = "test", derive(Deserialize, Clone))]
+pub struct StorageReport {
+    pub storage: U64,
+    pub locking_near: WrappedBalance,
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(crate = "near_sdk::serde")]
 #[cfg_attr(not(target_arch = "wasm32"), derive(Debug, PartialEq))]
@@ -71,6 +79,14 @@ impl Contract {
             token_account_id: current_state.token_account_id.clone(),
             total_balance: current_state.total_balance.into(),
             claimed_balance: current_state.claimed_balance.into(),
+        }
+    }
+
+    pub fn get_contract_storage_report(&self) -> StorageReport {
+        let su = env::storage_usage();
+        StorageReport {
+            storage: U64(su),
+            locking_near: (su as Balance * env::storage_byte_cost()).into(),
         }
     }
 

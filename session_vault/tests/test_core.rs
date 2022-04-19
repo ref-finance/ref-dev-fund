@@ -20,32 +20,37 @@ fn sim_set_owner() {
 
     let out_come =call!(
         user1,
-        session_vault.set_owner(user1.valid_account_id())
+        session_vault.set_owner(user1.valid_account_id()),
+        deposit = 1
     );
     assert_eq!(get_error_count(&out_come), 1);
     assert!(get_error_status(&out_come).contains("ERR_NOT_ALLOWED"));
 
     call!(
         owner,
-        session_vault.set_owner(user1.valid_account_id())
+        session_vault.set_owner(user1.valid_account_id()),
+        deposit = 1
     ).assert_success();
     let contract_info = view!(session_vault.contract_metadata()).unwrap_json::<ContractInfo>();
     assert_eq!(contract_info.owner_id, user1.account_id());
 
     call!(
         user1,
-        session_vault.add_account(user1.valid_account_id(), 10, 10, 1, 100.into())
+        session_vault.add_account(user1.valid_account_id(), 10, 10, 1, 100.into()),
+        deposit = to_yocto("0.1")
     ).assert_success();
 
 
     call!(
         user1,
-        session_vault.set_owner(owner.valid_account_id())
+        session_vault.set_owner(owner.valid_account_id()),
+        deposit = 1
     ).assert_success();
 
     let out_come =call!(
         user1,
-        session_vault.add_account(user1.valid_account_id(), 10, 10, 1, 100.into())
+        session_vault.add_account(user1.valid_account_id(), 10, 10, 1, 100.into()),
+        deposit = to_yocto("0.1")
     );
     assert_eq!(get_error_count(&out_come), 1);
     assert!(get_error_status(&out_come).contains("ERR_NOT_ALLOWED"));
@@ -61,19 +66,22 @@ fn sim_add_user() {
 
     let out_come =call!(
         user1,
-        session_vault.add_account(user1.valid_account_id(), 10, 10, 1, 100.into())
+        session_vault.add_account(user1.valid_account_id(), 10, 10, 1, 100.into()),
+        deposit = to_yocto("0.1")
     );
     assert_eq!(get_error_count(&out_come), 1);
     assert!(get_error_status(&out_come).contains("ERR_NOT_ALLOWED"));
 
     call!(
         owner,
-        session_vault.add_account(user1.valid_account_id(), 10, 10, 1, 100.into())
+        session_vault.add_account(user1.valid_account_id(), 10, 10, 1, 100.into()),
+        deposit = to_yocto("0.1")
     ).assert_success();
 
     let out_come =call!(
         owner,
-        session_vault.add_account(user1.valid_account_id(), 10, 10, 1, 100.into())
+        session_vault.add_account(user1.valid_account_id(), 10, 10, 1, 100.into()), 
+        deposit = to_yocto("0.1")
     );
     assert_eq!(get_error_count(&out_come), 1);
     assert!(get_error_status(&out_come).contains("ERR_ACCOUNT_IN_SESSION"));
@@ -81,7 +89,8 @@ fn sim_add_user() {
     root.borrow_runtime_mut().cur_block.block_timestamp = to_nano(20);
     let out_come =call!(
         owner,
-        session_vault.add_account(user1.valid_account_id(), 10, 10, 1, 100.into())
+        session_vault.add_account(user1.valid_account_id(), 10, 10, 1, 100.into()),
+        deposit = to_yocto("0.1")
     );
     assert_eq!(get_error_count(&out_come), 1);
     assert!(get_error_status(&out_come).contains("ERR_ACCOUNT_NEED_CLAIM"));
@@ -99,7 +108,8 @@ fn sim_deposit_token() {
 
     call!(
         owner,
-        session_vault.add_account(user1.valid_account_id(), 10, 10, 1, 100.into())
+        session_vault.add_account(user1.valid_account_id(), 10, 10, 1, 100.into()),
+        deposit = to_yocto("0.1")
     ).assert_success();
 
     let out_come = call!(
@@ -175,7 +185,8 @@ fn sim_claim() {
     
     call!(
         owner,
-        session_vault.add_account(user1.valid_account_id(), 10, 10, 1, 100.into())
+        session_vault.add_account(user1.valid_account_id(), 10, 10, 1, 100.into()),
+        deposit = to_yocto("0.1")
     ).assert_success();
 
     let contract_info = view!(session_vault.contract_metadata()).unwrap_json::<ContractInfo>();
@@ -235,7 +246,8 @@ fn sim_claim() {
 
     call!(
         owner,
-        session_vault.add_account(user1.valid_account_id(), 20, 20, 2, 100.into())
+        session_vault.add_account(user1.valid_account_id(), 20, 20, 2, 100.into()),
+        deposit = to_yocto("0.1")
     ).assert_success();
 
     let out_come = call!(

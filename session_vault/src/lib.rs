@@ -4,7 +4,7 @@
 */
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{UnorderedMap};
-use near_sdk::json_types::{ValidAccountId, WrappedBalance};
+use near_sdk::json_types::{ValidAccountId, WrappedBalance, U64};
 use near_sdk::{env, near_bindgen, AccountId, Balance, BorshStorageKey, PanicOnDefault};
 
 pub use crate::views::ContractInfo;
