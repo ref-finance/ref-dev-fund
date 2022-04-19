@@ -10,7 +10,7 @@ pub struct ContractInfo {
     pub owner_id: AccountId,
     // token kept by this vault
     pub token_account_id: AccountId,
-    // the total realized amount in this vault
+    // the total deposited amount in this vault
     pub total_balance: WrappedBalance,
     // already claimed balance
     pub claimed_balance: WrappedBalance,
@@ -31,10 +31,9 @@ pub struct AccountInfo {
     pub last_claim_session: u32,
     // expected total_amount = session_num * release_per_session
     pub release_per_session: WrappedBalance,
-    // actually deposited amount for the user
-    // each time ft_transfer_call would increase this one
-    // and realized_total_amount should >= expected total_amount to make it valid
-    pub realized_total_amount: WrappedBalance,
+
+    pub claimed_amount: WrappedBalance,
+    pub deposited_amount: WrappedBalance,
     // unclaimed amount
     pub unclaimed_amount: WrappedBalance,
 }

@@ -31,6 +31,7 @@ impl From<Account> for VAccount {
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Account {
     pub account_id: AccountId,
+    
     // session start time
     pub start_timestamp: TimestampSec,
     // per session lasts, eg: 90 days 
@@ -39,12 +40,15 @@ pub struct Account {
     pub session_num: u32,
     // the session index of previous claim, start from 1
     pub last_claim_session: u32,
-    // expected total_amount = session_num * release_per_session
+    // expected total amount this time = session_num * release_per_session
     pub release_per_session: Balance,
-    // actually deposited amount for the user
+
+    // accumulated claimed amount since account created,
+    // each time claim would increase this one
+    pub claimed_amount: Balance,
+    // accumulated deposited amount since account created,
     // each time ft_transfer_call would increase this one
-    // and realized_total_amount should >= expected total_amount to make it valid
-    pub realized_total_amount: Balance,
+    pub deposited_amount: Balance,
 }
 
 impl Account {
@@ -69,11 +73,15 @@ impl Account {
 
         self.release_per_session * times as u128
     }
+
+    pub fn locking_amount(&self) -> Balance {
+        self.deposited_amount - self.claimed_amount
+    }
 }
 
 impl Contract {
 
-    pub fn internal_add_realized_total_amount(
+    pub fn internal_deposit_to_account(
         &mut self,
         account_id: &AccountId,
         amount: Balance
@@ -84,9 +92,12 @@ impl Contract {
                 .get(&account_id)
                 .map(|va| va.into_current())
                 .expect("ERR_ACCOUNT_NOT_EXIST");
-        assert!(account.session_num as Balance * account.release_per_session <= amount, "ERR_AMOUNT_TOO_SMALL");
-        account.realized_total_amount += amount;
+        assert!(account.locking_amount() == 0 && account.last_claim_session != account.session_num, "ERR_ALREADY_DEPOSITED");
+        assert!(account.session_num as Balance * account.release_per_session == amount, "ERR_INCORRECT_AMOUNT");
+
+        account.deposited_amount += amount;
         self.data_mut().accounts.insert(&account_id, &account.into());
+        self.data_mut().total_balance += amount;
     }
     
     pub fn internal_add_account(
@@ -116,7 +127,8 @@ impl Contract {
                 session_num,
                 last_claim_session: 0,
                 release_per_session,
-                realized_total_amount: 0,
+                claimed_amount: 0,
+                deposited_amount: 0,
             };
             self.data_mut().accounts.insert(&account_id, &account.into());
         }
@@ -135,22 +147,26 @@ impl Contract {
                 .get(&account_id)
                 .map(|va| va.into_current())
                 .expect("ERR_ACCOUNT_NOT_EXIST");
+             
+        if account.last_claim_session > 0 && account.last_claim_session >= account.session_num {
+            // all token has been claimed.
+            return PromiseOrValue::Value(false);
+        }
         let amount = account.unclaimed_amount(env::block_timestamp());
         if amount == 0 {
             return PromiseOrValue::Value(true);
         }
 
         assert!(
-            amount <= account.realized_total_amount,
+            amount <= account.locking_amount(),
             "ERR_NOT_ENOUGH_BALANCE"
         );
 
         let sessions = (amount / account.release_per_session) as u32;
         account.last_claim_session += sessions;
-        account.realized_total_amount -= amount;
+        account.claimed_amount += amount;
 
         self.data_mut().claimed_balance += amount;
-        self.data_mut().total_balance -= amount;
         self.data_mut().accounts.insert(&account_id, &account.into());
 
         ext_fungible_token::ft_transfer(
@@ -187,10 +203,9 @@ impl Contract {
                 .expect("The claim is not found");
             let times = (amount.0 / account.release_per_session) as u32;
             account.last_claim_session -= times;
-            account.realized_total_amount += amount.0;
+            account.claimed_amount -= amount.0;
 
             self.data_mut().claimed_balance -= amount.0;
-            self.data_mut().total_balance += amount.0;
             self.data_mut().accounts.insert(&account_id, &account.into());
             log!(
                 "Account claim failed and rollback, account is {}, balance is {}",
@@ -226,9 +241,16 @@ impl FungibleTokenReceiver for Contract {
         if msg.is_empty() {
             env::panic(b"ERR_MISSING_ACCOUNT_ID");
         } else {
-            self.internal_add_realized_total_amount(&msg, amount);
+            self.internal_deposit_to_account(&msg, amount);
         }
-        self.data_mut().total_balance += amount;
+
+        let sender: AccountId = sender_id.into();
+        log!(
+            "{} deposit token to {}, amount: {}",
+            sender,
+            msg,
+            amount
+        );
         PromiseOrValue::Value(0.into())
     }
 }

@@ -34,6 +34,12 @@ token:
 test-session: session token
 	cd session_vault && RUSTFLAGS=$(RFLAGS) cargo test
 
+test-release-session: token
+	mv res/session_vault.wasm res/session_vault.wasm.back
+	cp release/session_vault_release.wasm res/session_vault.wasm
+	cd session_vault && RUSTFLAGS=$(RFLAGS) cargo test
+	mv res/session_vault.wasm.back res/session_vault.wasm
+
 define create_builder 
 	docker ps -a | grep $(1) || docker create \
 		--mount type=bind,source=${PWD},target=/host \

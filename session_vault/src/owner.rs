@@ -1,7 +1,6 @@
 //! Implement all the relevant logic for owner of this contract.
-use crate::utils::*;
 use crate::*;
-
+use crate::utils::TimestampSec;
 
 #[near_bindgen]
 impl Contract {
@@ -11,13 +10,13 @@ impl Contract {
         self.data_mut().owner_id = owner_id.as_ref().clone();
     }
 
-    /// Get the owner of this account.
-    pub fn get_owner(&self) -> AccountId {
-        self.data().owner_id.clone()
-    }
+    // /// Get the owner of this account.
+    // pub fn get_owner(&self) -> AccountId {
+    //     self.data().owner_id.clone()
+    // }
 
     pub fn add_account(
-        &mut self, 
+        &mut self,
         account_id: ValidAccountId,
         start_timestamp: TimestampSec,
         session_interval: TimestampSec,
@@ -26,11 +25,11 @@ impl Contract {
     ) -> bool {
         self.assert_owner();
         self.internal_add_account(
-            account_id.into(), 
-            start_timestamp, 
-            session_interval, 
+            account_id.into(),
+            start_timestamp,
+            session_interval,
             session_num,
-            release_per_session.into()
+            release_per_session.into(),
         )
     }
 
@@ -51,9 +50,6 @@ impl Contract {
         prev
     }
 }
-
-
-
 
 #[cfg(target_arch = "wasm32")]
 mod upgrade {
@@ -109,5 +105,4 @@ mod upgrade {
             });
         }
     }
-
 }

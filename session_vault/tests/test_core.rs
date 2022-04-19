@@ -69,7 +69,7 @@ fn core_logic() {
         deposit = 1
     );
     assert_eq!(get_error_count(&out_come), 1);
-    assert!(get_error_status(&out_come).contains("ERR_AMOUNT_TOO_SMALL"));
+    assert!(get_error_status(&out_come).contains("ERR_INCORRECT_AMOUNT"));
 
     call!(
         owner,

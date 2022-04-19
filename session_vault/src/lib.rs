@@ -3,7 +3,7 @@
 *
 */
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::collections::{LookupMap};
+use near_sdk::collections::{UnorderedMap};
 use near_sdk::json_types::{ValidAccountId, WrappedBalance};
 use near_sdk::{env, near_bindgen, AccountId, Balance, BorshStorageKey, PanicOnDefault};
 
@@ -29,13 +29,13 @@ pub struct ContractData {
     // token kept by this vault
     token_account_id: AccountId,
 
-    // the total realized amount in this vault
+    // the total deposited amount in this vault
     total_balance: Balance,
     
     // already claimed balance
     claimed_balance: Balance,
 
-    accounts: LookupMap<AccountId, VAccount>,
+    accounts: UnorderedMap<AccountId, VAccount>,
 }
 
 #[derive(BorshSerialize, BorshDeserialize)]
@@ -60,7 +60,7 @@ impl Contract {
                 token_account_id: token_id.into(),
                 total_balance: 0,
                 claimed_balance: 0,
-                accounts: LookupMap::new(StorageKeys::Accounts)
+                accounts: UnorderedMap::new(StorageKeys::Accounts)
             }),
         }
     }
