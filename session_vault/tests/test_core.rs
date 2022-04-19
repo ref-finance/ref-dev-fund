@@ -35,7 +35,7 @@ fn core_logic() {
 
     let out_come = call!(
         user1,
-        session_vault.claim()
+        session_vault.claim(None)
     );
     assert_eq!(get_error_count(&out_come), 1);
     assert!(get_error_status(&out_come).contains("ERR_NOT_ENOUGH_BALANCE"));
@@ -53,7 +53,7 @@ fn core_logic() {
 
     call!(
         user1,
-        session_vault.claim()
+        session_vault.claim(None)
     ).assert_success();
 
     assert_eq!(100, balance_of(&token, &user1.account_id()));
@@ -81,7 +81,7 @@ fn core_logic() {
 
     call!(
         user1,
-        session_vault.claim()
+        session_vault.claim(None)
     ).assert_success();
 
     assert_eq!(200, balance_of(&token, &user1.account_id()));
@@ -89,8 +89,8 @@ fn core_logic() {
     root.borrow_runtime_mut().cur_block.block_timestamp = to_nano(60);
 
     call!(
-        user1,
-        session_vault.claim()
+        owner,
+        session_vault.claim(Some(user1.valid_account_id()))
     ).assert_success();
 
     assert_eq!(300, balance_of(&token, &user1.account_id()));

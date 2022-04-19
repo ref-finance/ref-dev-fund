@@ -12,7 +12,7 @@ use test_token::ContractContract as TestToken;
 
 near_sdk_sim::lazy_static_include::lazy_static_include_bytes! {
     TEST_TOKEN_WASM_BYTES => "../res/test_token.wasm",
-    SESSION_VAULT_WASM_BYTES => "../res/session_vault_local.wasm",
+    SESSION_VAULT_WASM_BYTES => "../res/session_vault.wasm",
 }
 
 pub fn test_token(

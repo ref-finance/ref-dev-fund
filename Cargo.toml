@@ -2,6 +2,7 @@
 members = [
     "./vault",
     "./test_token",
+    "./session_vault",
 ]
 
 

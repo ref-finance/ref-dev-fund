@@ -2522,6 +2522,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "session_vault"
+version = "1.0.0"
+dependencies = [
+ "near-contract-standards",
+ "near-sdk",
+ "near-sdk-sim",
+ "test_token",
+ "uint",
+]
+
+[[package]]
 name = "sha2"
 version = "0.9.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"

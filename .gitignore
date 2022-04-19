@@ -1,5 +1,7 @@
 target/
 
+.vscode/
+
 neardev/
 
 res/vault.wasm

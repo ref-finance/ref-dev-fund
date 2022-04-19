@@ -127,8 +127,8 @@ impl Contract {
 #[near_bindgen]
 impl Contract {
     
-    pub fn claim(&mut self) -> PromiseOrValue<bool> {
-        let account_id = env::predecessor_account_id();
+    pub fn claim(&mut self, account_id: Option<ValidAccountId>) -> PromiseOrValue<bool> {
+        let account_id = account_id.map(|va| va.into()).unwrap_or(env::predecessor_account_id());
         let mut account = self
                 .data()
                 .accounts
