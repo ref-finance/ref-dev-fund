@@ -4,8 +4,8 @@ use near_sdk_sim::{deploy, view, init_simulator, to_yocto};
 use session_vault::{ContractContract as SessionVault, ContractInfo};
 
 near_sdk_sim::lazy_static_include::lazy_static_include_bytes! {
-    PREV_SESSION_VAULT_WASM_BYTES => "../res_test/session_vault.wasm",
-    SESSION_VAULT_WASM_BYTES => "../res_test/session_vault.wasm",
+    PREV_SESSION_VAULT_WASM_BYTES => "../res/session_vault.wasm",
+    SESSION_VAULT_WASM_BYTES => "../res/session_vault.wasm",
 }
 
 #[test]
