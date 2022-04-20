@@ -1,5 +1,7 @@
 target/
 
+res_test/
+
 .vscode/
 
 neardev/

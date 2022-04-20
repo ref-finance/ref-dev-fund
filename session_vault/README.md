@@ -25,7 +25,7 @@ Note:
 ```bash
 # start at 2022-04-20 09:00:00 => 1650416400
 # session interval 3 month: 3 * 30 * 24 * 3600 = 7776000
-near call $VAULT add_account '{"account_id": "u1.testnet", "start_timestamp": 1650416400, "session_interval": 7776000, "session_num": 4, "release_per_session": "100'$ZERO18'"}' --account_id=$ROOT
+near call $VAULT add_account '{"account_id": "u1.testnet", "start_timestamp": 1650416400, "session_interval": 7776000, "session_num": 4, "release_per_session": "100'$ZERO18'"}' --account_id=$ROOT --deposit=0.1
 # check
 near view $VAULT get_account '{"account_id": "u1.testnet"}'
 ```
@@ -51,7 +51,7 @@ Note:
 
 ### Transfer Ownership
 ```bash
-near call $VAULT set_owner '{"owner_id": "somedao.testnet"}'
+near call $VAULT set_owner '{"owner_id": "somedao.testnet"}' --account_id=$ROOT --depositYocto=1
 ```
 Note:  
 - For production running, owner should be some DAO contract
@@ -114,7 +114,15 @@ pub struct ContractInfo {
 ## All Views
 ```rust
 pub fn contract_metadata(&self) -> ContractInfo;
+pub fn get_contract_storage_report(&self) -> StorageReport;
 pub fn get_account(&self, account_id: ValidAccountId) -> Option<AccountInfo>;
 pub fn list_accounts(&self, from_index: Option<u64>, limit: Option<u64>) -> Vec<AccountInfo>;
 pub fn get_owner(&self) -> AccountId;
+```
+
+```bash
+near view $VAULT contract_metadata
+near view $VAULT get_contract_storage_report
+near view $VAULT get_account '{"account_id": "xxx"}'
+near view $VAULT list_accounts ''
 ```

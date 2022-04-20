@@ -5,10 +5,13 @@ SESSION_RELEASE=session_vault
 
 RFLAGS="-C link-arg=-s"
 
-test-session: session token
+test: session token
+	mkdir -p res_test
+	cp res/session_vault.wasm res_test/session_vault.wasm
+	cp res/test_token.wasm res_test/test_token.wasm
 	cd session_vault && RUSTFLAGS=$(RFLAGS) cargo test -- --nocapture
 
-docker-session:
+docker:
 	$(call create_builder,${SESSION_BUILDER_NAME},${SESSION_DIR})
 	$(call start_builder,${SESSION_BUILDER_NAME})
 	$(call setup_builder,${SESSION_BUILDER_NAME})
@@ -32,11 +35,14 @@ token:
 	mkdir -p res
 	cp target/wasm32-unknown-unknown/release/test_token.wasm ./res/test_token.wasm
 
-test-release-session: token
-	mv res/session_vault.wasm res/session_vault.wasm.back
-	cp release/session_vault_release.wasm res/session_vault.wasm
+test-releases: token
+	mkdir -p res_test
+	cp release/session_vault_release.wasm res_test/session_vault.wasm
+	cp res/test_token.wasm res_test/test_token.wasm
 	cd session_vault && RUSTFLAGS=$(RFLAGS) cargo test
-	mv res/session_vault.wasm.back res/session_vault.wasm
+
+remove-builder:
+	$(call remove_builder,${SESSION_BUILDER_NAME})
 
 define create_builder 
 	docker ps -a | grep $(1) || docker create \
