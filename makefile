@@ -7,6 +7,10 @@ test: session token
 	RUSTFLAGS=$(RFLAGS) cargo test -p session_vault -- --nocapture
 
 release:
+	$(call docker_build,_rust_setup.sh)
+	cp target/wasm32-unknown-unknown/release/session_vault.wasm res/session_vault_release.wasm
+
+release-old:
 	$(call create_builder,${SESSION_BUILDER_NAME})
 	$(call start_builder,${SESSION_BUILDER_NAME})
 	$(call setup_builder,${SESSION_BUILDER_NAME})
@@ -36,6 +40,17 @@ remove-builder:
 clean:
 	cargo clean
 	rm -rf res/
+
+define docker_build
+	docker build -t my-contract-builder .
+	docker run \
+		--mount type=bind,source=${PWD},target=/host \
+		--cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
+		-w /host \
+		-e RUSTFLAGS=$(RFLAGS) \
+		-i -t my-contract-builder \
+		/bin/bash $(1)
+endef
 
 define create_builder 
 	docker ps -a | grep $(1) || docker create \
