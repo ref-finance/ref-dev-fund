@@ -8,12 +8,14 @@ test: session token
 
 release:
 	$(call docker_build,_rust_setup.sh)
+	mkdir -p res
 	cp target/wasm32-unknown-unknown/release/session_vault.wasm res/session_vault_release.wasm
 
 release-old:
 	$(call create_builder,${SESSION_BUILDER_NAME})
 	$(call start_builder,${SESSION_BUILDER_NAME})
 	$(call setup_builder,${SESSION_BUILDER_NAME})
+	mkdir -p res
 	cp target/wasm32-unknown-unknown/release/session_vault.wasm res/session_vault_release.wasm
 
 session: 
